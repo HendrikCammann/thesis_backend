@@ -53,22 +53,22 @@ module.exports = {
                     };
                     cluster_anchors.push(new ClusterModel.ClusterItem('All', 1, false, baseTimeRange));
 
-                    let temp = new Date(item.date);
+                    let temp = new Date(item.start_date);
 
                     if (temp <= FakeData.Karlsruhe.range.end && temp >= FakeData.Karlsruhe.range.start) {
                         cluster_anchors.push(FakeData.Karlsruhe.name, 2, true, FakeData.Karlsruhe.range);
                     }
                     if (temp <= FakeData.Barcelona.range.end && temp >= FakeData.Barcelona.range.start) {
-                        cluster_anchors.push(FakeData.Barcelona.name, 2, true, FakeData.Barcelona.range);
+                        cluster_anchors.push(FakeData.Barcelona.name, 3, true, FakeData.Barcelona.range);
                     }
                     if (temp <= FakeData.Kandel.range.end && temp >= FakeData.Kandel.range.start) {
-                        cluster_anchors.push(FakeData.Kandel.name, 2, true, FakeData.Kandel.range);
+                        cluster_anchors.push(FakeData.Kandel.name, 4, true, FakeData.Kandel.range);
                     }
                     if (temp <= FakeData.Hannover.range.end && temp >= FakeData.Hannover.range.start) {
-                        cluster_anchors.push(FakeData.Hannover.name, 2, true, FakeData.Hannover.range);
+                        cluster_anchors.push(FakeData.Hannover.name, 5, true, FakeData.Hannover.range);
                     }
 
-                    let categorization = new ActivityModel.ActivityCategorization(anchor_month, anchor_year, cluster_anchors, RunTypes.applyRunType(item.type));
+                    let categorization = new ActivityModel.ActivityCategorization(anchor_month, anchor_year, cluster_anchors, RunTypes.applyRunType(item.workout_type));
 
                     let activity = new ActivityModel.ActivityModel(item.id, item.name, item.start_date, controls, avg, base, max, categorization, map, null, null, null);
                     activities.unshift(activity);
@@ -161,26 +161,24 @@ module.exports = {
                     let pace;
                     let altitude;
                     let cadence;
-                    if(streams.length >= 1) {
-                        streams.map(stream => {
-                            switch (stream.type) {
-                                case 'distance':
-                                    distance = stream;
-                                    break;
-                                case 'heartrate':
-                                    hr = stream;
-                                    break;
-                                case 'altidude':
-                                    altitude = stream;
-                                    break;
-                                case 'cadence':
-                                    cadence = stream;
-                                    break;
-                                case 'velocity_smooth':
-                                    pace = stream;
-                                    break;
-                            }
-                        });
+                    for (let prop in streams) {
+                        switch (streams[prop].type) {
+                            case 'distance':
+                                distance = streams[prop];
+                                break;
+                            case 'heartrate':
+                                hr = streams[prop];
+                                break;
+                            case 'altidude':
+                                altitude = streams[prop];
+                                break;
+                            case 'cadence':
+                                cadence = streams[prop];
+                                break;
+                            case 'velocity_smooth':
+                                pace = streams[prop];
+                                break;
+                        }
                     }
                     let activityStreams = new ActivityStreamModel.ActivityStreamModel(distance, altitude, hr, cadence, pace);
                     knex('activities')
@@ -188,7 +186,7 @@ module.exports = {
                         .update({
                             streams: JSON.stringify(activityStreams)
                         }).then(function (result) {
-                        console.log('inserted zones for: ' + item.id);
+                        console.log('inserted streams for: ' + item.id);
                     })
                 });
             })
