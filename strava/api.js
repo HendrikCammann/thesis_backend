@@ -1,4 +1,5 @@
 const strava = require('strava-v3');
+let activities = [];
 
 return module.exports = {
     /**
@@ -9,18 +10,19 @@ return module.exports = {
      * @param cb
      */
     getActivities: function (page, per_page, accessToken, cb) {
-        let activities = [];
         strava.athlete.listActivities({
             access_token: accessToken,
             page: page,
             per_page: per_page
         }, function (err, payload, limits) {
             if (!err) {
-                activities = [...activities, ...payload];
+                activities.push(...payload);
                 if (payload.length === per_page) {
                     page++;
+                    console.log('recall', activities.length);
                     module.exports.getActivities(page, per_page, accessToken, cb)
                 } else {
+                    console.log('callback', activities.length);
                     cb(activities);
                 }
             }

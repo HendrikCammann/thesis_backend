@@ -28,8 +28,8 @@ module.exports = {
 
     updateDataBase () {
         console.log('Heard it');
+        let activities = [];
         stravaApi.getActivities(stravaConfig.page, stravaConfig.per_page, stravaConfig.token, (items) => {
-            let activities = [];
             let oldestDate = null;
             items.reverse().forEach(item => {
                 if (item.type === 'Run') {
@@ -99,9 +99,9 @@ module.exports = {
                     });
                     */
 
-                    let controls = new ActivityModel.ActivityControls(item.controls);
+                    let controls = new ActivityModel.ActivityControls(item.has_heartrate);
                     let avg = new ActivityModel.ActivityAverageData(item.average_heartrate, item.average_speed, item.average_cadence);
-                    let base = new ActivityModel.ActivityBaseData(item.distance, item.moving_time, item.elev_high, item.elev_down, item.total_elevation_gain, item.suffer_score);
+                    let base = new ActivityModel.ActivityBaseData(item.distance, item.moving_time, item.elev_high, item.elev_low, item.total_elevation_gain, item.suffer_score);
                     let max = new ActivityModel.ActivityMaxData(item.max_heartrate, item.max_speed);
                     let map = new ActivityModel.ActivityMap(item.map, item.start_latlng, item.end_latlng);
 
@@ -131,12 +131,12 @@ module.exports = {
 
                     let categorization = new ActivityModel.ActivityCategorization(anchor_month, anchor_year, cluster_anchors, RunTypes.applyRunType(item.type));
 
-                    let activity = new ActivityModel.ActivityModel(item.id, item.name, item.date, controls, avg, base, max, categorization, map, null, null, null);
+                    let activity = new ActivityModel.ActivityModel(item.id, item.name, item.start_date, controls, avg, base, max, categorization, map, null, null, null);
                     activities.unshift(activity);
                 }
             });
-            console.log('activities', activities);
         });
+
         return Promise.resolve();
     },
 
