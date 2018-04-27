@@ -13,7 +13,7 @@ const knex = require('knex')(require('./knexfile'));
 const stravaConfig = {
     token: '386bced857a83a6a4575b2308a3de25b95fa9116',
     page: 1,
-    per_page: 2,
+    per_page: 40,
     streams: ['cadence', 'altitude', 'velocity_smooth', 'heartrate'],
 };
 
@@ -136,6 +136,9 @@ module.exports = {
                     activities.unshift(activity);
                 }
             });
+            knex('activities').truncate().then( function () {
+                console.log('dropped');
+            });
             activities.map(activity => {
                 knex('activities').insert({
                     id: activity.id,
@@ -151,7 +154,7 @@ module.exports = {
                     zones: null,
                     streams: null,
                 }).then( function (result) {
-                    console.log('hi');     // respond back to request
+                    console.log('inserted');     // respond back to request
                 })
             });
         });
