@@ -1,16 +1,25 @@
-const CreateUser = document.querySelector('.CreateUser');
-
-CreateUser.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const username = CreateUser.querySelector('.username').value;
-    const password = CreateUser.querySelector('.password').value;
-    post('/createUser', { username, password });
-});
-
 const UpdateDataBase = document.querySelector('.UpdateDataBase');
 UpdateDataBase.addEventListener('submit', (e) => {
     e.preventDefault();
     post('/updateDataBase');
+});
+
+const FetchDetails = document.querySelector('.FetchDetailInfo');
+FetchDetails.addEventListener('submit', (e) => {
+    e.preventDefault();
+    post('/fetchDetails');
+});
+
+const FetchZones = document.querySelector('.FetchZones');
+FetchZones.addEventListener('submit', (e) => {
+    e.preventDefault();
+    post('/fetchZones');
+});
+
+const FetchStreams = document.querySelector('.FetchStreams');
+FetchStreams.addEventListener('submit', (e) => {
+    e.preventDefault();
+    post('/fetchStreams');
 });
 
 function post (path, data) {

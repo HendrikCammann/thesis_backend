@@ -17,7 +17,7 @@ return module.exports = {
         }, function (err, payload, limits) {
             if (!err) {
                 activities.push(...payload);
-                if (payload.length === per_page) {
+                if (payload.length === per_page && per_page < 1) {
                     console.log(activities.length);
                     page++;
                     module.exports.getActivities(page, per_page, accessToken, cb)

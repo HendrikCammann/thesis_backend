@@ -4,6 +4,7 @@ const store = require('./store');
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.json());
+
 app.post('/createUser', (req, res) => {
     store
         .createUser({
@@ -16,6 +17,24 @@ app.post('/createUser', (req, res) => {
 app.post('/updateDataBase', (req, res) => {
     store
         .updateDataBase()
+        .then(() => res.sendStatus(200))
+});
+
+app.post('/fetchDetails', (req, res) => {
+    store
+        .fetchDetails()
+        .then(() => res.sendStatus(200))
+});
+
+app.post('/fetchStreams', (req, res) => {
+    store
+        .fetchStreams()
+        .then(() => res.sendStatus(200))
+});
+
+app.post('/fetchZones', (req, res) => {
+    store
+        .fetchZones()
         .then(() => res.sendStatus(200))
 });
 

@@ -13,7 +13,7 @@ const knex = require('knex')(require('./knexfile'));
 const stravaConfig = {
     token: '386bced857a83a6a4575b2308a3de25b95fa9116',
     page: 1,
-    per_page: 40,
+    per_page: 2,
     streams: ['cadence', 'altitude', 'velocity_smooth', 'heartrate'],
 };
 
@@ -37,68 +37,6 @@ module.exports = {
                     if (oldestDate === null) {
                         oldestDate = item.start_date;
                     }
-
-                    /*
-                    let activityDetails;
-                    let activityZones;
-                    let activityStreams;
-
-                    stravaApi.getActivity(item.id, stravaConfig.token, (activity) => {
-                        let categorization = new ActivityDetailModel.ActivityDetailCategorization(activity.type, RunTypes.applyRunType(activity.workout_type));
-                        let controls = new ActivityDetailModel.ActivityDetailControls(activity.has_heartrate);
-                        let avg = new ActivityDetailModel.ActivityDetailAverageData(activity.average_heartrate, activity.average_speed, activity.average_cadence);
-                        let max = new ActivityDetailModel.ActivityDetailMaxData(activity.max_heartrate, activity.max_speed);
-                        let base = new ActivityDetailModel.ActivityDetailBaseData(activity.calories, activity.distance, activity.moving_time, activity.elev_high, activity.elev_low, activity.total_elevation_gain, activity.suffer_score);
-                        let map = new ActivityDetailModel.ActivityDetailMap(activity.map, activity.start_latlng, activity.end_latlng);
-                        let splits = new ActivityDetailModel.ActivityDetailsSplits(activity.splits_metric, activity.splits_standard);
-
-                        activityDetails = new ActivityDetailModel.ActivityDetailModel(activity.id, activity.description, activity.date, controls, categorization, avg, base, max, map, activity.best_effords, activity.laps, activity.similar_activities, splits)
-                    });
-
-                    stravaApi.getActivityZones(item.id, stravaConfig.token, (zones) => {
-                        let hr;
-                        let pace;
-                        zones.map(zone => {
-                            switch (zone.type) {
-                                case 'heartrate':
-                                    hr = zone;
-                                    break;
-                                case 'pace':
-                                    pace = zone;
-                                    break;
-                            }
-                        });
-                        activityZones = new ActivityZoneModel.ActivityZoneModel(pace, hr);
-                    });
-
-                    stravaApi.getActivityStreams(item.id, stravaConfig.streams, stravaConfig.token, (streams) => {
-                        let distance;
-                        let hr;
-                        let pace;
-                        let altitude;
-                        let cadence;
-                        streams.map(stream => {
-                            switch (stream.type) {
-                                case 'distance':
-                                    distance = stream;
-                                    break;
-                                case 'heartrate':
-                                    hr = stream;
-                                    break;
-                                case 'altidude':
-                                    altitude = stream;
-                                    break;
-                                case 'cadence':
-                                    cadence = stream;
-                                    break;
-                                case 'velocity_smooth':
-                                    pace = stream;
-                                    break;
-                            }
-                        });
-                        activityStreams = new ActivityStreamModel.ActivityStreamModel(distance, altitude, hr, cadence, pace);
-                    });
-                    */
 
                     let controls = new ActivityModel.ActivityControls(item.has_heartrate);
                     let avg = new ActivityModel.ActivityAverageData(item.average_heartrate, item.average_speed, item.average_cadence);
@@ -160,7 +98,100 @@ module.exports = {
         });
     },
 
-    updateActivityDetails () {
+    fetchDetails: async function () {
+        knex.select().from('activities').then(function(result) {
+            result.map(item => {
+                stravaApi.getActivity(item.id, stravaConfig.token, (activity) => {
+                    let categorization = new ActivityDetailModel.ActivityDetailCategorization(activity.type, RunTypes.applyRunType(activity.workout_type));
+                    let controls = new ActivityDetailModel.ActivityDetailControls(activity.has_heartrate);
+                    let avg = new ActivityDetailModel.ActivityDetailAverageData(activity.average_heartrate, activity.average_speed, activity.average_cadence);
+                    let max = new ActivityDetailModel.ActivityDetailMaxData(activity.max_heartrate, activity.max_speed);
+                    let base = new ActivityDetailModel.ActivityDetailBaseData(activity.calories, activity.distance, activity.moving_time, activity.elev_high, activity.elev_low, activity.total_elevation_gain, activity.suffer_score);
+                    let map = new ActivityDetailModel.ActivityDetailMap(activity.map, activity.start_latlng, activity.end_latlng);
+                    let splits = new ActivityDetailModel.ActivityDetailsSplits(activity.splits_metric, activity.splits_standard);
 
+                    let activityDetails = new ActivityDetailModel.ActivityDetailModel(activity.id, activity.description, activity.date, controls, categorization, avg, base, max, map, activity.best_effords, activity.laps, activity.similar_activities, splits)
+                    knex('activities')
+                        .where('id', '=', item.id)
+                        .update({
+                            details: JSON.stringify(activityDetails)
+                        }).then(function (result) {
+                            console.log('inserted details for: ' + item.id);
+                        })
+                });
+            })
+        })
+    },
+
+    fetchZones: async function () {
+        knex.select().from('activities').then(function(result) {
+            result.map(item => {
+                stravaApi.getActivityZones(item.id, stravaConfig.token, (zones) => {
+                    let hr;
+                    let pace;
+                    zones.map(zone => {
+                        switch (zone.type) {
+                            case 'heartrate':
+                                hr = zone;
+                                break;
+                            case 'pace':
+                                pace = zone;
+                                break;
+                        }
+                    });
+                    let activityZones = new ActivityZoneModel.ActivityZoneModel(pace, hr);
+                    knex('activities')
+                        .where('id', '=', item.id)
+                        .update({
+                            zones: JSON.stringify(activityZones)
+                        }).then(function (result) {
+                        console.log('inserted zones for: ' + item.id);
+                    })
+                });
+            })
+        })
+    },
+
+    fetchStreams: async function () {
+        knex.select().from('activities').then(function(result) {
+            result.map(item => {
+                stravaApi.getActivityStreams(item.id, stravaConfig.streams, stravaConfig.token, (streams) => {
+                    let distance;
+                    let hr;
+                    let pace;
+                    let altitude;
+                    let cadence;
+                    if(streams.length >= 1) {
+                        streams.map(stream => {
+                            switch (stream.type) {
+                                case 'distance':
+                                    distance = stream;
+                                    break;
+                                case 'heartrate':
+                                    hr = stream;
+                                    break;
+                                case 'altidude':
+                                    altitude = stream;
+                                    break;
+                                case 'cadence':
+                                    cadence = stream;
+                                    break;
+                                case 'velocity_smooth':
+                                    pace = stream;
+                                    break;
+                            }
+                        });
+                    }
+                    let activityStreams = new ActivityStreamModel.ActivityStreamModel(distance, altitude, hr, cadence, pace);
+                    knex('activities')
+                        .where('id', '=', item.id)
+                        .update({
+                            streams: JSON.stringify(activityStreams)
+                        }).then(function (result) {
+                        console.log('inserted zones for: ' + item.id);
+                    })
+                });
+            })
+        })
     }
 };
