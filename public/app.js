@@ -7,6 +7,12 @@ CreateUser.addEventListener('submit', (e) => {
     post('/createUser', { username, password });
 });
 
+const UpdateDataBase = document.querySelector('.UpdateDataBase');
+UpdateDataBase.addEventListener('submit', (e) => {
+    e.preventDefault();
+    post('/updateDataBase');
+});
+
 function post (path, data) {
     return window.fetch(path, {
         method: 'POST',

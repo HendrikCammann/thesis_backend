@@ -6,5 +6,10 @@ module.exports = {
             username,
             password
         })
+    },
+
+    updateDataBase () {
+        console.log('Heard it');
+        return Promise.resolve();
     }
 };

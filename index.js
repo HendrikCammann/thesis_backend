@@ -12,6 +12,13 @@ app.post('/createUser', (req, res) => {
         })
         .then(() => res.sendStatus(200))
 });
+
+app.post('/updateDataBase', (req, res) => {
+    store
+        .updateDataBase()
+        .then(() => res.sendStatus(200))
+});
+
 app.listen(7555, () => {
     console.log('Server running on http://localhost:7555')
 });
