@@ -17,12 +17,10 @@ return module.exports = {
         }, function (err, payload, limits) {
             if (!err) {
                 activities.push(...payload);
-                if (payload.length === per_page) {
+                if (payload.length === per_page && page === 1) {
                     page++;
-                    console.log('recall', activities.length);
                     module.exports.getActivities(page, per_page, accessToken, cb)
                 } else {
-                    console.log('callback', activities.length);
                     cb(activities);
                 }
             }

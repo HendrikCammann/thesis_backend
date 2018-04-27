@@ -3,7 +3,7 @@ exports.up = function (knex) {
         t.increments('index').primary();
         t.biginteger('id').notNullable();
         t.string('name').notNullable();
-        t.date('date').notNullable();
+        t.string('date').notNullable();
         t.json('controls').notNullable();
         t.json('average_data').notNullable();
         t.json('base_data').notNullable();

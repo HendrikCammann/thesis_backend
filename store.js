@@ -13,9 +13,10 @@ const knex = require('knex')(require('./knexfile'));
 const stravaConfig = {
     token: '386bced857a83a6a4575b2308a3de25b95fa9116',
     page: 1,
-    per_page: 20,
+    per_page: 2,
     streams: ['cadence', 'altitude', 'velocity_smooth', 'heartrate'],
 };
+
 
 module.exports = {
     createUser ({ username, password }) {
@@ -26,7 +27,7 @@ module.exports = {
         })
     },
 
-    updateDataBase () {
+    updateDataBase: async function () {
         console.log('Heard it');
         let activities = [];
         stravaApi.getActivities(stravaConfig.page, stravaConfig.per_page, stravaConfig.token, (items) => {
@@ -135,9 +136,25 @@ module.exports = {
                     activities.unshift(activity);
                 }
             });
+            activities.map(activity => {
+                knex('activities').insert({
+                    id: activity.id,
+                    name: activity.name,
+                    date: activity.date,
+                    controls: JSON.stringify(activity.controls),
+                    average_data: JSON.stringify(activity.average_data),
+                    base_data: JSON.stringify(activity.base_data),
+                    max_Data: JSON.stringify(activity.max_data),
+                    categorization: JSON.stringify(activity.categorization),
+                    map: JSON.stringify(activity.map),
+                    details: null,
+                    zones: null,
+                    streams: null,
+                }).then( function (result) {
+                    console.log('hi');     // respond back to request
+                })
+            });
         });
-
-        return Promise.resolve();
     },
 
     updateActivityDetails () {
